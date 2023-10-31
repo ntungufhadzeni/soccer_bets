@@ -3,7 +3,7 @@ version: "3.9"
 services:
   web:
     build: .
-    command: sh -c "python manage.py makemigrations && python manage.py migrate --noinput && python manage.py collectstatic --noinput && python manage.py runserver 0.0.0.0:8000"
+    command: sh -c "python manage.py makemigrations bets && python manage.py migrate --noinput && python manage.py collectstatic --noinput && python manage.py runserver 0.0.0.0:8000"
     volumes:
       - .:/home/app
       - static_volume:/home/app/static
