@@ -1,0 +1,62 @@
+version: "3.9"
+
+services:
+  web:
+    build: .
+    command: sh -c "python manage.py migrate && python manage.py collectstatic --noinput && gunicorn soccer_bets.wsgi:application --bind 0.0.0.0:8000"
+    volumes:
+      - static_volume:/home/app/static
+      - media_volume:/home/app/media
+    env_file:
+      - .env
+    depends_on:
+      - db
+      - redis
+  nginx:
+    build: ./nginx
+    restart: unless-stopped
+    volumes:
+      - static_volume:/home/app/static
+      - media_volume:/home/app/media
+      - certbot_etc:/etc/letsencrypt
+      - certbot_var:/var/lib/letsencrypt
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - web
+  db:
+    image: postgres:13
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    env_file:
+      - .env
+    environment:
+      - POSTGRES_DB=${SQL_DATABASE}
+      - POSTGRES_USER=${SQL_USER}
+      - POSTGRES_PASSWORD=${SQL_PASSWORD}
+  redis:
+    image: redis:latest
+  celery:
+    build: .
+    command: celery -A soccer_bets worker -l info
+    env_file:
+      - .env
+    depends_on:
+      - redis
+      - db
+  celery-beat:
+    build: .
+    command: celery -A soccer_bets beat -l info
+    env_file:
+      - .env
+    depends_on:
+      - redis
+      - db
+
+volumes:
+  postgres_data:
+  certbot_etc:
+  certbot_var:
+  media_volume:
+  static_volume:

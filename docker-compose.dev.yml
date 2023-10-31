@@ -1,0 +1,60 @@
+version: "3.9"
+
+services:
+  web:
+    build: .
+    command: sh -c "python manage.py migrate --noinput && python manage.py collectstatic --noinput && python manage.py runserver 0.0.0.0:8000"
+    volumes:
+      - .:/home/app
+      - static_volume:/home/app/static
+      - media_volume:/home/app/media
+    env_file:
+      - .env.dev
+    depends_on:
+      - db
+      - redis
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile.dev
+    restart: unless-stopped
+    volumes:
+      - static_volume:/home/app/static
+      - media_volume:/home/app/media
+    ports:
+      - "80:80"
+    depends_on:
+      - web
+  db:
+    image: postgres:13
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    env_file:
+      - .env.dev
+    environment:
+      - POSTGRES_DB=${SQL_DATABASE}
+      - POSTGRES_USER=${SQL_USER}
+      - POSTGRES_PASSWORD=${SQL_PASSWORD}
+  redis:
+    image: redis:latest
+  celery:
+    build: .
+    command: celery -A soccer_bets worker -l info
+    env_file:
+      - .env.dev
+    depends_on:
+      - db
+      - redis
+  celery-beat:
+    build: .
+    command: celery -A soccer_bets beat -l info
+    env_file:
+      - .env.dev
+    depends_on:
+      - redis
+      - db
+
+volumes:
+  postgres_data:
+  media_volume:
+  static_volume:

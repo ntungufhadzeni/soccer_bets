@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% block title %} Football Betting {% endblock %}
+{% block content %}
+<form>
+    {% csrf_token %}
+    <div style="display: flex; align-items: center;">
+        {% if unique_countries %}
+        <div>
+            <label for="country_select">Country:</label>
+            <select name="selected_country" id="country_select">
+                {% for country in unique_countries %}
+                <option value="{{ country }}" {% if country == selected_country %} selected {% endif %}>
+                    {{ country }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        {% endif %}
+        <div>
+            <label for="datepicker">Date:</label>
+            <input type="date" id="datepicker" name="selected_date" value="{{ date|date:'Y-m-d' }}" required>
+        </div>
+    </div>
+</form>
+<h2 id="country"></h2>
+<div id="matches"></div>
+{% endblock %}
+{% block custom_js %}
+<script>
+    $(document).ready(function () {
+    // Initial load
+    loadData();
+
+    // Function to load data based on selected country and date
+    function loadData() {
+        const country = $('#country_select').val();
+        const date = $('#datepicker').val();
+
+        const loadingAnimation = `<div class="animation-container">
+                                    <div class="dash uno"></div>
+                                    <div class="dash dos"></div>
+                                    <div class="dash tres"></div>
+                                    <div class="dash cuatro"></div>
+                                    </div>`
+
+        $("#country").html(country)
+
+        $("#matches").html(loadingAnimation)
+
+        $.ajax({
+            url: "{% url 'matches' %}",
+            method: "GET",
+            data: {
+                country: country,
+                date: date
+            },
+            success: function (data) {
+                $("#matches").html(data);
+            }
+        });
+    }
+
+    // Event handlers for input changes
+    $('#country_select, #datepicker').on('input', loadData);
+});
+</script>
+{% endblock %}
