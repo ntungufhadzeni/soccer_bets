@@ -13,7 +13,7 @@ To run the Soccer Bets Project on your local environment, follow these steps:
 1. Clone the repository to your local machine:
 
     ```
-   https://github.com/ntungufhadzeni/soccer_bets.git
+   git clone https://github.com/ntungufhadzeni/soccer_bets.git
    ```
 2. Navigate to the project directory:
    ```
