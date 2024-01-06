@@ -40,13 +40,14 @@ To run the Soccer Bets Project on your local environment, follow these steps:
    ```
 5. Build and start docker containers:
    ```
-      docker-compose -f docker-compose.dev.yml up --build
+   docker-compose -f docker-compose.dev.yml up --build
     ```
 6. Access the project in your web browser at `http://127.0.0.1/`.
 7. Create superuser account:
    ```
-      docker exec -it web bash
-      
-      python manage.py createsuperuser
+   docker exec -it web bash
+    ```
+   ```
+   python manage.py createsuperuser
     ```
 8. Log in to the admin panel and schedule cronjobs to retrieve data from the API: `http://127.0.0.1/admin`.
